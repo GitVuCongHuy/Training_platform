@@ -1,377 +1,108 @@
-# AI Platform — FastAPI + React (Vite) + SQLite
+<div align="center">
+  <h1>🚀 AI Tool Suite Pro</h1>
+  <p><b>Nền tảng Web toàn diện cho Computer Vision & Generative AI</b></p>
+  <p><i>FastAPI (Backend) + React/Vite (Frontend) + SQLite</i></p>
+</div>
 
-Nền tảng web cho Computer Vision gồm 3 module chính:
+<br />
 
-1. **Gen AI & Change Background (Page 1)**
-2. **Train / Test YOLO Model (Page 2)**
-3. **Export Model (Page 3)**
+## 🌟 Giới thiệu (Introduction)
+**AI Tool Suite Pro** là một nền tảng web mạnh mẽ được thiết kế để đơn giản hóa workflow làm việc với các mô hình Trí tuệ Nhân tạo (Computer Vision & Gen AI). Thay vì phải code script phức tạp bằng Python, người dùng có thể dễ dàng quản lý dataset, huấn luyện mô hình YOLO (Object Detection/Classification), xóa phông ảnh bằng AI, và tạo ảnh bằng văn bản hoàn toàn thông qua giao diện kéo-thả trực quan.
 
+## ✨ Tính năng nổi bật & Lợi ích (Features & Benefits)
 
-![alt text](image-1.png)
+### 1. 🎨 Generative AI & Change Background
+- **Text-to-Image Generation**: Tự do sáng tạo hình ảnh từ văn bản bằng mô hình Flux qua API của [Pollinations.ai](https://pollinations.ai). Tùy chỉnh số lượng ảnh, kích thước, hạt giống (seed) dễ dàng.
+- **Auto Background Removal (SAM)**: Tự động tách nền cực chuẩn nhờ sức mạnh của **Segment Anything Model (SAM)**. Hỗ trợ xử lý ảnh đơn hoặc xử lý hàng loạt cả thư mục.
+
+### 2. 🧠 Huấn luyện & Kiểm thử YOLO (Train/Test Model)
+- **Real-time Training Tracking**: Huấn luyện YOLOv8/v10/v11 (Classification & Detection) trực tiếp trên Web. Theo dõi biểu đồ Loss, Accuracy, mAP theo thời gian thực.
+- **Dataset Management**: Cấu trúc thư mục dataset linh hoạt, tự động nhận diện và tính toán thông số.
+- **Model Evaluation**: Chạy kiểm thử model sau khi train, xuất ra confusion matrix và các chỉ số đánh giá độ chính xác (Precision/Recall).
+
+### 3. ⚙️ Tối ưu mô hình (Export Model)
+- Hỗ trợ convert file `.pt` sang các định dạng tối ưu cho ứng dụng thực tế.
+- **ONNX Export**: Cho phép bật tính năng `Simplify graph` và `Dynamic axes` để file nhẹ hơn, chạy mượt trên nhiều thiết bị.
+- **TensorRT Export**: Ép kiểu mô hình sang `.engine` (hỗ trợ FP16, INT8) để đạt tốc độ xử lý (inference) bứt phá trên GPU NVIDIA.
+
 ---
 
-## Project Structure
-```
-project-root/
-├── backend/
-│ ├── main.py
-│ ├── task_manager.py
-│ ├── ai_app.db
-│ │
-│ ├── api/
-│ │ ├── gen_ai_api.py
-│ │ ├── change_bg_api.py
-│ │ ├── training_api.py
-│ │ └── export_api.py
-│ │
-│ ├── config/
-│ │ └── settings.py
-│ │
-│ ├── database/
-│ │ ├── database.py
-│ │ ├── models.py
-│ │ └── crud.py
-│ │
-│ ├── models_hub/
-│ │ └── .gitkeep
-│ │
-│ ├── services/
-│ │ ├── core/
-│ │ │ └── model_loader.py
-│ │ │
-│ │ ├── generation/
-│ │ │ ├── gen_ai_service.py
-│ │ │ └── change_bg_service.py
-│ │ │
-│ │ ├── training/
-│ │ │ ├── core.py
-│ │ │ ├── job_manager.py
-│ │ │ ├── service.py
-│ │ │ ├── trainers/
-│ │ │ │ ├── base.py
-│ │ │ │ └── classifier.py
-│ │ │ └── utils/
-│ │ │ └── dataset.py
-│ │ │
-│ │ └── export/
-│ │ └── export_service.py
-│ │
-│ └── storage/
-│ ├── temp_uploads/
-│ ├── training_sessions/
-│ ├── testing_sessions/
-│ └── manual_exports/
-│
-└── frontend-vite/
-├── index.html
-├── vite.config.js
-├── package.json
-│
-└── src/
-├── api/
-├── components/
-│ ├── NavBar.jsx
-│ └── TabPanel.jsx
-│
-└── pages/
-├── Home/
-├── GenAiPage/
-├── TrainModelPage/
-└── ExportPage/
+## 🛠️ Hướng dẫn cài đặt (Setup Guide)
 
-```
----
+Hệ thống yêu cầu máy tính đã cài đặt sẵn **Python 3.10+** và **Node.js (npm)**.
 
-## Backend Setup (FastAPI)
+### Bước 1: Backend (Cấu hình lõi AI)
 
-### 1) Create venv & install dependencies
-
+1. Mở terminal, đi tới thư mục `backend` và tạo môi trường ảo:
 ```bash
 cd backend
 python -m venv .venv
 ```
+2. Kích hoạt môi trường:
+- **Windows:** `.venv\Scripts\activate`
+- **Linux/Mac:** `source .venv/bin/activate`
 
-**Windows:**
-```bash
-.venv\Scripts\activate
-```
-
-**Linux/Mac:**
-```bash
-source .venv/bin/activate
-```
-
-Install dependencies:
-
+3. Cài đặt các thư viện lõi:
 ```bash
 pip install -r requirements.txt
 ```
+> **Lưu ý**: Lần chạy đầu tiên, hệ thống sẽ tự động tải các file weights nặng (như `yolov8n.pt` hoặc `sam_vit_h.pth` từ hub) nếu chưa có sẵn. Đảm bảo bạn có kết nối mạng ổn định.
 
-> Nếu project yêu cầu thêm torch/torchvision/albumentations/shapely…  
-> → Cài thêm theo error `ImportError` cụ thể trên máy bạn.
-
----
-
-### 2) Configuration
-
-Backend hỗ trợ configuration qua **environment variables** (.env file).
-
-#### Tạo file .env (tùy chọn):
-
+4. Chạy Backend Server:
 ```bash
-copy .env.example .env
+python -m uvicorn backend.main:app --reload
 ```
+API của bạn sẽ chạy tại địa chỉ: `http://localhost:8000`
 
-Nếu không tạo `.env`, backend sẽ dùng defaults (localhost, port 8000).
+### Bước 2: Frontend (Giao diện người dùng)
 
-**File `.env` mẫu:**
-```env
-BACKEND_HOST=127.0.0.1
-BACKEND_PORT=8000
-CORS_ORIGINS=http://localhost:5173,http://localhost:5174,http://localhost:3000
-ENVIRONMENT=development
-```
-
-> **💡 Tip:** Để chia sẻ qua local network cho team, đổi `BACKEND_HOST=0.0.0.0` và thêm IP máy bạn vào `CORS_ORIGINS`.  
-> Chi tiết xem file [DEPLOYMENT.md](DEPLOYMENT.md)
-
----
-
-### 3) Run backend
-
-```bash
-python -m uvicorn backend.main:app --reload ```
-
-Hoặc chỉ định host/port:
-```bash
-python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-DB: backend/ai_app.db
-
-Checkpoints:
-backend/models_hub/yolo11x.pt
-backend/models_hub/sam_vit_h_4b8939.pth
-
-
-Backend sẽ tự động:
-
-- tạo DB nếu chưa có
-- tạo các folder storage
-- tải SAM checkpoint nếu thiếu
-
----
-
-### 3) Run backend
-
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-
-
-**Docs:**
-
-- Swagger UI → http://localhost:8000/docs  
-- OpenAPI JSON → http://localhost:8000/openapi.json
-
----
-
-## Frontend Setup (React + Vite)
-
-### 1) Install dependencies
-
+1. Mở một terminal khác, trỏ vào thư mục `frontend-vite`:
 ```bash
 cd frontend-vite
+```
+2. Cài đặt các modules React:
+```bash
 npm install
 ```
-
-### 2) Configuration (tùy chọn)
-
-Frontend tự động detect backend URL. Nếu muốn override:
-
-```bash
-copy .env.example .env
-```
-
-**File `.env` mẫu:**
-```env
-VITE_API_URL=http://localhost:8000
-```
-
-### 3) Run dev server
-
+3. Khởi chạy giao diện:
 ```bash
 npm run dev
 ```
-
-Frontend chạy tại: `http://localhost:5173`
-
-> **💡 Tip:** Vite tự động expose qua LAN. Team members cùng mạng có thể truy cập qua IP máy bạn.
-
-### 4) Build production
-
-```bash
-npm run build
-```
----
-
-## Frontend ↔ Backend Connection
-
-Frontend tự động kết nối với backend thông qua:
-
-**File:** `frontend-vite/src/config.js`
-
-Config tự động detect:
-1. Environment variable `VITE_API_URL` (từ .env)
-2. Auto-detect từ current hostname (production)
-3. Fallback to `http://localhost:8000` (development)
-
-**Override bằng .env:**
-```env
-VITE_API_URL=http://192.168.1.100:8000
-```
+Trang web sẽ hiện lên tại `http://localhost:5173`. Frontend sẽ tự động nhận diện kết nối với Backend.
 
 ---
 
-## API Endpoints
+## ⚠️ Cảnh báo & Trú ý quan trọng (Important Notices)
 
-Backend mount router theo backend/main.py:
+> [!WARNING]
+> ### 1. Key API cho Generative AI
+> Chức năng **Gen AI** bắt buộc phải có khóa xác thực (API Key). 
+> 1. Truy cập [enter.pollinations.ai](https://enter.pollinations.ai) để lấy Key.
+> 2. Điền Key trực tiếp vào giao diện Website để sử dụng. Hoặc thêm vào file `backend/.env` với biến `POLLINATIONS_API_KEY=your_key_here`.
 
-/gen-ai                # Gen AI
-/change-bg             # Change Background
-/train                 # Train/Test YOLO
-/export                # Export Model
+> [!CAUTION]
+> ### 2. Tối ưu TensorRT trên Windows
+> Tính năng **Export Model sang định dạng TENSORRT** yêu cầu bắt buộc thiết bị phải có **GPU NVIDIA** vật lý và cài sẵn đúng chuẩn CUDA driver.
+> - Phiên bản `tensorrt` mặc định trên PyPI không hỗ trợ Windows một cách hoàn hảo. Để dùng được TensorRT trên Windows, bạn **phải gõ cài đặt thủ công** theo hướng dẫn sau:
+>   `pip install tensorrt --extra-index-url https://pypi.nvidia.com`
+> - Nếu máy tính của bạn chỉ dùng CPU hoặc không setup môi trường NVIDIA đạt chuẩn, quá trình xuất TensorRT sẽ báo lỗi: *"Chưa cài tensorrt cho Python hiện tại"*. Lúc này, vui lòng sử dụng **ONNX**!
 
-/task-status/{id}      # Task progress
-/cancel-task/{id}      # Cancel task
-/upload-image          # Upload ảnh tạm
-/select-folder         # Chọn folder bằng dialog OS (local only)
-
-Chi tiết endpoint nằm trong backend/api/*.py.
-Dataset Format (YOLO)
-Classification
-
-dataset/
-  train/
-    class_a/
-    class_b/
-  val/
-    class_a/
-    class_b/
-  test/ (optional)
-
-Detection
-
-dataset/
-  train/
-    images/
-    labels/
-  val/
-    images/
-    labels/
-  test/ (optional)
-
-How To Use (UI Guide)
-Page 1 — Gen AI
-
-    Nhập prompt hoặc chọn class.
-
-    Bấm Generate.
-
-    Theo dõi task realtime.
-
-    Ảnh lưu trong backend/storage/....
-
-Page 1 — Change Background
-
-    Upload ảnh hoặc chọn folder ảnh.
-
-    Chọn background.
-
-    Bấm Start Change BG.
-
-    Theo dõi tiến trình.
-
-    Kết quả xuất ra trong storage.
-
-Page 2 — Train Model
-
-Train New Model
-
-    Chọn task type: classification / detection.
-
-    Chọn dataset path.
-
-    Chọn YOLO model (v8/v10/v11 – n/s/m/l/x).
-
-    Set hyperparameters.
-
-    Bấm Start Training.
-
-    Theo dõi realtime loss/acc/mAP.
-
-    Kết quả lưu theo session.
-
-Test Model
-
-    Chọn session/model.
-
-    Chọn test folder.
-
-    Xem confusion matrix / metrics.
-
-Page 3 — Export Model
-
-    Upload .pt.
-
-    Chọn định dạng export.
-
-    Bấm Export.
-
-    Tải artifact trong storage.
-
-Common Issues
-
-### 1) CORS error
-
-**Giải pháp:** Thêm frontend URL vào `backend/.env`:
-
-```env
-CORS_ORIGINS=http://localhost:5173,http://192.168.1.100:5173
-```
-
-Restart backend sau khi sửa.
-
-### 2) Frontend không connect được Backend
-
-**Giải pháp:** Set `VITE_API_URL` trong `frontend-vite/.env`:
-
-```env
-VITE_API_URL=http://192.168.1.100:8000
-```
-
-Rebuild: `npm run build` (production) hoặc restart dev server.
-
-### 3) `/select-folder` lỗi trên server
-
-**Giải pháp:** Endpoint này cần GUI, không hoạt động trên server.
-- Dùng text input để nhập path
-- Hoặc upload files qua `/upload-image`
-
-### 4) Weight nặng
-
-Không commit `.pt` / `.pth`. Lưu trong `backend/models_hub/`.
-
-### 5) SQLite locked
-
-Đóng các tool đang mở DB (DB Browser / VSCode extension).
-
-### 6) Không có GPU
-
-Backend tự chuyển sang CPU.
+> [!NOTE]
+> ### 3. Quản lý dung lượng (Storage)
+> Các checkpoint nặng, dataset đã tải về không nên được `git commit` để tránh phình to repo. Mọi trọng số mô hình sẽ lưu ở thư mục `backend/models_hub/` và kết quả tạo ảnh/train/export sẽ sinh tự động ở `backend/storage/`. Khi clone project mới về, các thư mục này mặc định là rỗng.
 
 ---
 
-## 🚀 Deployment Guide
-
-Xem hướng dẫn chi tiết về deployment (local network sharing, production server) trong:
-
-**[DEPLOYMENT.md](DEPLOYMENT.md)**
+## 🏗️ Kiến trúc Project (Cơ bản)
+```text
+project-root/
+├── backend/                  # Logic xử lý AI (Python, FastAPI, Ultralytics, SAM)
+│   ├── api/                  # Các Router & Endpoints (REST API)
+│   ├── config/               # Biến môi trường & cấu hình lõi
+│   ├── database/             # SQLite Models & DB connection
+│   ├── services/             # Function thực hiện Train/Export/Sinh ảnh thật sự
+│   └── storage/              # Nơi chứa output (session train/ảnh gen/file tải xuống)
+└── frontend-vite/            # Giao diện Web Client (React, Vite, MUI)
+    ├── src/api/              # Các hàm HTTP fetch tới backend
+    └── src/pages/            # Lõi chia Layout và Tabs quản lý
+```
