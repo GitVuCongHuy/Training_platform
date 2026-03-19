@@ -1,0 +1,130 @@
+backend/
+│
+├── main.py                      # Khởi động FastAPI, load sẵn YOLO+SAM vào app.state, tạo DB, gắn CORS và mount các router (gen-ai / change-bg / train / export) kèm tiện ích upload, chọn thư mục, hủy/poll tác vụ.
+├── task_manager.py              # Quản lý trạng thái realtime của các tác vụ dài (ví dụ gen ảnh) trong RAM: tạo task, cập nhật tiến trình, xem trạng thái, đánh dấu hủy và kết thúc task.
+├── ai_app.db                    # database SQLite
+│
+├── api/
+│   ├── change_bg_api.py         # Router cho API Page 1 (Change Background) nhận request tách mask, ghép mask với background, cập nhật ảnh đơn/hàng loạt (chạy nền via BackgroundTasks), kèm API tiện ích (liệt kê/lấy ảnh) và trả task_id để theo dõi tiến trình
+│   ├── export_api.py            # Router FastAPI cho Page 3: nhận file .pt và xuất sang các định dạng deploy (ONNX, TorchScript, OpenVINO, NCNN, CoreML, TFLite), rồi cho phép tải file xuất ra.
+│   ├── gen_ai_api.py            # Router FastAPI cho Page 1 (Gen AI): tạo tác vụ sinh ảnh theo prompt cho từng class (chạy nền) và quản lý lịch sử sinh ảnh trong database.
+│   ├── training_api.py          # Router FastAPI cho Page 2 (Train Model): tạo, dừng và theo dõi phiên training YOLO (bao gồm lưu lịch sử, xem metrics, và xóa session).
+│   └── __init__.py
+│
+├── config/
+│   ├── settings.py              # Cấu hình backend: đặt BASE_DIR, URL SQLite DB, thư mục models_hub và các đường dẫn/loại checkpoint cho YOLO & SAM (kèm URL tải), đồng thời tạo thư mục nếu chưa có.
+│   └── __init__.py
+│
+├── database/
+│   ├── database.py              # Khởi tạo kết nối SQLite + Session + Base và cung cấp hàm get_db() để dependency cho FastAPI.
+│   ├── crud.py                  # CRUD cho lịch sử Gen AI: đọc, tạo và xóa record PromptHistory trong database.
+│   ├── models.py                # Định nghĩa bảng PromptHistory (lưu lịch sử sinh ảnh) và bảng TrainingSession (lưu thông tin + trạng thái + metrics mỗi phiên train).
+│   └── __init__.py
+│
+├── models_hub/
+│   ├── yolo11x.pt               
+│   ├── sam_vit_h_4b8939.pth     
+│   └── .gitkeep
+│
+├── services/
+│   └── core
+│       └── _init_.py
+│       └── model_loader.py         # tải/khởi tạo YOLO và SAM (tự tải checkpoint SAM nếu thiếu với progress), rồi trả về YOLO(...) và SamPredictor trên thiết bị cuda/cpu
+│   └── export
+│       └── export_service.py       # nhận file .pt, gọi ultralytics.YOLO().export() với các tùy chọn, rồi trả về đường dẫn model được xuất sang định dạng deploy (ONNX / TensorRT).
+│   └── generation
+│       └── change_bg_service.py     # tách mask người bằng YOLO+SAM, ghép lên background (đơn/hàng loạt), áp 3D transform (scale/pitch/yaw/roll/translate) với làm mịn biên, và báo tiến độ qua task_manager.
+│       └── gen_ai_service.py        # sinh ảnh nền (async): gọi Pollinations theo từng class (500 ảnh/class), lưu ra thư mục, ghi lịch sử vào DB, và cập nhật tiến độ/huỷ qua task_manager với retry & throttle.
+│   └── training/
+│       └── trainers
+│           ├── __pycache__
+│           ├── _init_.py
+│           ├── base.py
+│           └── classifier.py
+│       └── utils
+│           ├── __pycache__
+│           ├── _init_.py
+│           └── dataset.py
+│       ├── _init_.py      
+│       ├── core.py      
+│       ├── job_manager.py         
+│       └── service.py
+│   └── __init__.py
+│
+└── storage/
+│   └── manual_exports/ 
+│   └── train_outputs/           
+│   └── testing_sessions/ 
+│   └── training_sessions/
+runs
+├── classify
+│   └── train_session_1
+│       └── weights
+│       └── ......các ảnh chỉ số kết quả của model   
+├── detect   
+│   └── train_session_8
+│       └── weights
+│       └── ......các ảnh chỉ số kết quả của model
+uvicorn backend.main:app --reload
+py -3.10 -m uvicorn backend.main:app --reload
+
+frontend-vite/
+├── index.html               
+├── vite.config.js             
+├── package.json                
+├── package-lock.json           
+├── eslint.config.js            
+│
+└── src/
+    ├── App.jsx                 
+    ├── App.css                 
+    ├── index.jsx               
+    ├── index.css               
+    ├── api/                  
+    │   └── index.jsx           
+    │
+    ├── components/
+    │   ├── NavBar.jsx          
+    │   └── TabPanel.jsx           
+    │
+    └── pages/
+        ├── Home/
+        │   └── HomePage.jsx   
+        ├── ExportPage/
+        │   └── ExpotModelPage.jsx
+        ├── GenAiPage/
+        │   └── components   
+        │          └── EditModal.jsx
+        │          └── GenAiHistoryList.jsx   
+        │          └── GenAiProgressDisplay.jsx   
+        │   └── hooks
+        │          └── useChangeBgTaskStatus.js
+        │          └── useGenAiTaskStatus.js
+        │   └── tabs
+        │          └── ChangeBgTab.jsx
+        │          └── GenAiTab.jsx
+        │   └── index.jsx   
+        ├── TrainModelPage/
+        │   └── components   
+        │          └── ConfusionMatrixHeatmap.jsx
+        │          └── LossChart.jsx   
+        │          └── RenderMetrics.jsx
+        │          └── MetricCell.jsx
+        │          └── OverallImprovementDialog.jsx   
+        │          └── TestingHistoryTable.jsx   
+        │   └── hooks
+        │          └── useTestStatus.js
+        │          └── useTrainingStatus.js
+        │          └── useSessionNameSuggestion.js
+        │          └── useTestingStatus.js
+        │   └── tabs
+        │          └── HistoryTabManager.jsx
+        │          └── TestingHistoryTab.jsx
+        │          └── TestingModelTab.jsx
+        │          └── TrainingHistoryTab.jsx
+        │          └── TrainNewModelTab.jsx
+        │   └── utils
+        │          └── getStatusChipColor.js
+        │          └── metrics.js
+        │          └── sesionName.js
+        │   └── index.jsx   

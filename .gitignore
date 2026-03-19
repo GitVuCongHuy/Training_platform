@@ -1,0 +1,76 @@
+#############################
+# GLOBAL
+#############################
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+*.zip
+*.tar
+*.gz
+
+#############################
+# BACKEND (FastAPI + Python)
+#############################
+backend/__pycache__/
+backend/**/*.pyc
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.venv/
+backend/models_hub/
+backend/venv/
+backend/env/
+backend/.env
+
+# SQLite database – ignore để tránh file quá lớn
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+*.db
+*.sqlite
+
+# YOLO related heavy outputs
+backend/runs/
+backend/storage/train_outputs/
+backend/storage/training_sessions/
+backend/storage/testing_sessions/
+backend/storage/manual_exports/
+backend/ai_app.db/
+# Models hub – ignore YOLO/SAM weights
+backend/models_hub/*.pt
+backend/models_hub/*.pth
+# nhưng vẫn giữ .gitkeep
+!backend/models_hub/.gitkeep
+
+#############################
+# FRONTEND (React Vite)
+#############################
+frontend-vite/node_modules/
+frontend-vite/dist/
+frontend-vite/build/
+frontend-vite/.vite/
+frontend-vite/.env
+frontend-vite/.env.local
+frontend-vite/.env.*.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+D:\New folder\note.txt
+#############################
+# ULTRALYTICS auto output
+#############################
+runs/
+runs/**/weights/
+runs/**/
+backend/storage
+#############################
+# OTHER
+#############################
+__pycache__/
+*.pyc
+*.pt
+*.pth
